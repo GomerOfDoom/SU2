@@ -157,12 +157,29 @@ public:
    * \brief Get the primitive variables limiter.
    * \return Primitive variables limiter for the entire domain.
    */
-  inline MatrixType& GetLimiter_Primitive(void) {
+  inline MatrixType& GetLimiter_Primitive(void) {return Limiter_Primitive; }
 
-    SU2_MPI::Error(string("Limiters (associated to MUSCL) are computed for conserved variables in the NEMO solver.") +
-                   string("Limiters for primitive variables are not allocated/computed."),
-                   CURRENT_FUNCTION);
-    return Primitive;
+  /*!
+   * \brief Set the gradient of the primitive variables.
+   * \param[in] iVar - Index of the variable.
+   * \param[in] iDim - Index of the dimension.
+   * \param[in] value - Value of the gradient.
+   */
+  inline su2double GetLimiter_Primitive(unsigned long iPoint, unsigned long iVar) const final {return Limiter_Primitive(iPoint,iVar); }
+
+  /*!
+   * \brief Get the value of the primitive variables gradient.
+   * \return Value of the primitive variables gradient.
+   */
+  inline su2double *GetLimiter_Primitive(unsigned long iPoint) final { return Limiter_Primitive[iPoint]; }
+  
+  /*!
+   * \brief Set the gradient of the primitive variables.
+   * \param[in] iVar - Index of the variable.
+   * \param[in] value - Value of the gradient.
+   */
+  inline void SetLimiter_Primitive(unsigned long iPoint, unsigned long iVar, su2double value) final {
+    Limiter_Primitive(iPoint,iVar) = value;
   }
 
   /*!
@@ -343,9 +360,20 @@ public:
   * \brief Check for unphysical points.
   * \return Boolean value of physical point 
   */
-  bool CheckNonPhys(su2double *U, su2double *V, su2double *dPdU,
-                    su2double *dTdU, su2double *dTvedU, su2double *val_eves,
-                    su2double *val_Cvves);
+  bool CheckNonPhys(su2double *V);
+  
+  /*!
+   * \brief Recompute the extrapolated quantities, after MUSCL reconstruction,
+   *        in a more thermodynamically consistent way.
+   * \param[in] V - primitve variables.
+   * \param[out] d*dU - reconstructed secondaryvariables.
+   * \param[out] val_eves - reconstructed eve per species.
+   * \param[out] val_cvves - reconstructed cvve per species.
+   * \param[out] Gamma - reconstructed gamma.
+   */
+  su2double ComputeConsistentExtrapolation(su2double *V, su2double* dPdU,
+                                           su2double* dTdU, su2double* dTvedU,
+                                           su2double* val_eves,su2double* val_cvves);
 
   /*---------------------------------------*/
   /*---   Specific variable routines    ---*/

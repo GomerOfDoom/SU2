@@ -85,10 +85,10 @@ void CNEMONSSolver::Preprocessing(CGeometry *geometry, CSolver **solver_containe
   if ((muscl && !center) && (iMesh == MESH_0)) {
     switch (config->GetKind_Gradient_Method_Recon()) {
       case GREEN_GAUSS:
-        SetSolution_Gradient_GG(geometry, config, true); break;
+        SetPrimitive_Gradient_GG(geometry, config, true); break;
       case LEAST_SQUARES:
       case WEIGHTED_LEAST_SQUARES:
-        SetSolution_Gradient_LS(geometry, config, true); break;
+        SetPrimitive_Gradient_LS(geometry, config, true); break;
       default: break;
     }
   } 
@@ -106,7 +106,7 @@ void CNEMONSSolver::Preprocessing(CGeometry *geometry, CSolver **solver_containe
    *    viscous terms (check this logic with JST and 2nd order turbulence model) ---*/
 
   if ((iMesh == MESH_0) && (limiter_flow || limiter_turb || limiter_adjflow) && !Output && !van_albada) {
-    SetSolution_Limiter(geometry, config);
+    SetPrimitive_Limiter(geometry, config);
   }
 
   /*--- Evaluate the vorticity and strain rate magnitude ---*/
