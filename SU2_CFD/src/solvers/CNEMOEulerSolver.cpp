@@ -821,7 +821,7 @@ void CNEMOEulerSolver::Upwind_Residual(CGeometry *geometry, CSolver **solver_con
   su2double      Cvve_i[MAXNVAR] = {0.0},      Cvve_j[MAXNVAR] = {0.0};
 
   /*--- Loop over edges and calculate convective fluxes ---*/
-  for(unsigned short long iEdge = 0; iEdge < geometry->GetnEdge(); iEdge++) {
+  for(unsigned long iEdge = 0; iEdge < geometry->GetnEdge(); iEdge++) {
 
     unsigned short iDim, iVar;
 
@@ -890,13 +890,13 @@ void CNEMOEulerSolver::Upwind_Residual(CGeometry *geometry, CSolver **solver_con
           }
           if (lim_i > Limiter_i[iVar] && Limiter_i[iVar] != 0) lim_i = Limiter_i[iVar];
           if (lim_j > Limiter_j[iVar] && Limiter_j[iVar] != 0) lim_j = Limiter_j[iVar];
-          lim_ij = min(lim_i, lim_j);
+          su2double lim_ij = min(lim_i, lim_j);
 
           Primitive_i[iVar] = V_i[iVar] + lim_ij*Project_Grad_i;
-          Primitive_j[iVar] = V_j[iVar] + Lim_ij*Project_Grad_j;      
+          Primitive_j[iVar] = V_j[iVar] + lim_ij*Project_Grad_j;      
         } else {
-          Primitive_i[iVar] = V_i[iVar] + Project_Grad_i[iVar];
-          Primitive_j[iVar] = V_j[iVar] + Project_Grad_j[iVar];
+          Primitive_i[iVar] = V_i[iVar] + Project_Grad_i;
+          Primitive_j[iVar] = V_j[iVar] + Project_Grad_j;
         }
       }
 
@@ -942,7 +942,7 @@ void CNEMOEulerSolver::Upwind_Residual(CGeometry *geometry, CSolver **solver_con
     auto residual = numerics->ComputeResidual(config);
 
     /*--- Check for NaNs before applying the residual to the linear system ---*/
-    err = false;
+    bool err = false;
     for (iVar = 0; iVar < nVar; iVar++)
       if (residual[iVar] != residual[iVar]) err = true;
     //if (implicit)
