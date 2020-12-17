@@ -35,7 +35,7 @@
  * \brief Main class for defining the variables of the NEMO Euler's solver.
  * \ingroup Euler_Equations
  * \author S. R. Copeland, F. Palacios, W. Maier, C. Garbacz
- * \version 7.0.6
+ * \version 7.0.8
  */
 class CNEMOEulerVariable : public CVariable {
 public:
@@ -350,11 +350,16 @@ public:
   bool SetPrimVar(unsigned long iPoint, CFluidModel *FluidModel) override;
 
  /*!
-  * \brief Set all the conserved variables.
+  * \brief Set all the primitive and secondary variables from the conserved vector.
   */
   bool Cons2PrimVar(su2double *U, su2double *V, su2double *dPdU,
                     su2double *dTdU, su2double *dTvedU, su2double *val_eves,
                     su2double *val_Cvves);
+
+ /*!
+  * \brief Set all the conserved variables from the primitive vector..
+  */
+  void Prim2ConsVar(su2double *U, su2double *V);
 
  /*!
   * \brief Check for unphysical points.

@@ -346,6 +346,36 @@ bool CNEMOEulerVariable::Cons2PrimVar(su2double *U, su2double *V,
   return nonPhys;
 }
 
+void CNEMOEulerVariable::Prim2ConsVar(su2double *U, su2double *V) {
+
+  /*---Useful variables ---*/
+  vector<su2double> Energies;
+  su2double*  MassFrac;
+
+  /*--- Set densities and mass fraction ---*/
+  for (unsigned short iSpecies = 0; iSpecies < nSpecies; iSpecies++){
+    U[iSpecies]        = V[iSpecies];
+    MassFrac[iSpecies] = V[iSpecies]/V[RHO_INDEX];
+  }
+
+  /*--- Set momentum and compute v^2 ---*/
+  //TODO: geometry toolbox
+  su2double sqvel = 0.0;
+  for (unsigned short iDim = 0; iDim < nDim; iDim++){
+    U[nSpecies+iDim] = V[RHO_INDEX]*V[VEL_INDEX+iDim];
+    sqvel           += V[VEL_INDEX+iDim]*V[VEL_INDEX+iDim];
+  }
+  
+  /*--- Set the fluidmodel and recompute energies ---*/
+  fluidmodel->SetTDStatePTTv(V[P_INDEX], MassFrac, V[T_INDEX], V[TVE_INDEX]);
+  Energies = fluidmodel->ComputeMixtureEnergies();
+  
+  /*--- Set conservative energies ---*/
+  U[nSpecies+nDim]   = V[RHO_INDEX]*(Energies[0]+0.5*sqvel);
+  U[nSpecies+nDim+1] = V[RHO_INDEX]*(Energies[1]);
+
+}
+
 void CNEMOEulerVariable::SetSolution_New() { Solution_New = Solution; }
 
 bool CNEMOEulerVariable::CheckNonPhys(su2double *V) {

@@ -900,10 +900,6 @@ void CNEMOEulerSolver::Upwind_Residual(CGeometry *geometry, CSolver **solver_con
         }
       }
 
-      /*--- Compute Secondary variables in a thermaodynamically consistent way. ---*/
-      Gamma_i = nodes->ComputeConsistentExtrapolation(Primitive_i, dPdU_i, dTdU_i, dTvedU_i, Eve_i, Cvve_i);
-      Gamma_j = nodes->ComputeConsistentExtrapolation(Primitive_j, dPdU_j, dTdU_j, dTvedU_j, Eve_j, Cvve_j);
-
       /*--- Check for non-physical solutions after reconstruction. If found, use the
        cell-average value of the solution. This is a locally 1st order approximation,
        which is typically only active during the start-up of a calculation. ---*/
@@ -916,6 +912,16 @@ void CNEMOEulerSolver::Upwind_Residual(CGeometry *geometry, CSolver **solver_con
       /*--- Get updated state, in case the point recovered after the set. ---*/
       chk_err_i = nodes->GetNon_Physical(iPoint);
       chk_err_j = nodes->GetNon_Physical(jPoint);
+
+      /*--- Compute Secondary variables in a thermaodynamically consistent way. ---*/
+      if (!chk_err_i) Gamma_i = nodes->ComputeConsistentExtrapolation(Primitive_i, dPdU_i, dTdU_i, dTvedU_i, Eve_i, Cvve_i);
+      if (!chk_err_j) Gamma_j = nodes->ComputeConsistentExtrapolation(Primitive_j, dPdU_j, dTdU_j, dTvedU_j, Eve_j, Cvve_j);
+
+      /*--- Recompute Conserved variables if Roe or MSW scheme ---*/
+      if (config->GetKind_ConvNumScheme_Flow() == ROE ||  config->GetKind_ConvNumScheme_Flow() == MSW){
+        if (!chk_err_i) nodes->Prim2ConsVar(Conserved_i,Primitive_i);
+        if (!chk_err_j) nodes->Prim2ConsVar(Conserved_j,Primitive_j);  
+      }
 
       /*--- If non-physical, revert to first order ---*/
       numerics->SetConservative(chk_err_i ? U_i : Conserved_i, chk_err_j ? U_j : Conserved_j);
