@@ -905,7 +905,7 @@ void CNEMOEulerSolver::Upwind_Residual(CGeometry *geometry, CSolver **solver_con
        which is typically only active during the start-up of a calculation. ---*/
       chk_err_i = nodes->CheckNonPhys(Primitive_i);
       chk_err_j = nodes->CheckNonPhys(Primitive_j);
-
+      
       nodes->SetNon_Physical(iPoint, chk_err_i);
       nodes->SetNon_Physical(jPoint, chk_err_j);
 
@@ -918,8 +918,8 @@ void CNEMOEulerSolver::Upwind_Residual(CGeometry *geometry, CSolver **solver_con
       if (!chk_err_j) Gamma_j = nodes->ComputeConsistentExtrapolation(Primitive_j, dPdU_j, dTdU_j, dTvedU_j, Eve_j, Cvve_j);
 
       /*--- Recompute Conserved variables if Roe or MSW scheme ---*/
-      if (config->GetKind_ConvNumScheme_Flow() == ROE ||  config->GetKind_ConvNumScheme_Flow() == MSW){
-        if (!chk_err_i) nodes->Prim2ConsVar(Conserved_i,Primitive_i);
+      if ((config->GetKind_Upwind_Flow() == ROE) || (config->GetKind_Upwind_Flow() == MSW)){
+	if (!chk_err_i) nodes->Prim2ConsVar(Conserved_i,Primitive_i);
         if (!chk_err_j) nodes->Prim2ConsVar(Conserved_j,Primitive_j);  
       }
 

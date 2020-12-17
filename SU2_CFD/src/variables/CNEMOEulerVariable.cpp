@@ -349,13 +349,15 @@ bool CNEMOEulerVariable::Cons2PrimVar(su2double *U, su2double *V,
 void CNEMOEulerVariable::Prim2ConsVar(su2double *U, su2double *V) {
 
   /*---Useful variables ---*/
-  vector<su2double> Energies;
-  su2double*  MassFrac;
-
+  vector<su2double> Energies, rhos;
+  rhos.resize(nSpecies,0.0);
+  
   /*--- Set densities and mass fraction ---*/
   for (unsigned short iSpecies = 0; iSpecies < nSpecies; iSpecies++){
-    U[iSpecies]        = V[iSpecies];
-    MassFrac[iSpecies] = V[iSpecies]/V[RHO_INDEX];
+    U[iSpecies]    = V[iSpecies];
+    rhos[iSpecies] = V[iSpecies];
+  if (U[iSpecies] > 10)
+    cout <<"delete me "<<V[iSpecies] <<endl;
   }
 
   /*--- Set momentum and compute v^2 ---*/
@@ -367,13 +369,12 @@ void CNEMOEulerVariable::Prim2ConsVar(su2double *U, su2double *V) {
   }
   
   /*--- Set the fluidmodel and recompute energies ---*/
-  fluidmodel->SetTDStatePTTv(V[P_INDEX], MassFrac, V[T_INDEX], V[TVE_INDEX]);
+  fluidmodel->SetTDStateRhosTTv( rhos, V[T_INDEX], V[TVE_INDEX]);
   Energies = fluidmodel->ComputeMixtureEnergies();
   
   /*--- Set conservative energies ---*/
   U[nSpecies+nDim]   = V[RHO_INDEX]*(Energies[0]+0.5*sqvel);
   U[nSpecies+nDim+1] = V[RHO_INDEX]*(Energies[1]);
-
 }
 
 void CNEMOEulerVariable::SetSolution_New() { Solution_New = Solution; }
