@@ -998,8 +998,7 @@ void CNEMONSSolver::BC_Smoluchowski_Maxwell(CGeometry *geometry,
 
 
   unsigned short iDim, jDim, iVar, iSpecies;
-  unsigned short T_INDEX, TVE_INDEX, VEL_INDEX,
-      RHOCVTR_INDEX, RHOCVVE_INDEX;
+  unsigned short T_INDEX, TVE_INDEX, VEL_INDEX;
   unsigned long iVertex, iPoint, jPoint;
   su2double ktr, kve, Mass = 0.0;
   su2double Ti, Tvei, Tj, Tvej;
@@ -1108,7 +1107,7 @@ void CNEMONSSolver::BC_Smoluchowski_Maxwell(CGeometry *geometry,
 
       for (unsigned short iSpecies=0; iSpecies<nSpecies; iSpecies++)
         Mass += Vi[iSpecies]*Ms[iSpecies];
-      Cptr = Vi[RHOCVTR_INDEX]+Ru/Mass;
+      Cptr = rhoCvtr + Ru/Mass;
       tmp1 = Cptr*(Eddy_Visc/Prandtl_Turb);
       scl  = tmp1/ktr;
       ktr += Cptr*(Eddy_Visc/Prandtl_Turb);
